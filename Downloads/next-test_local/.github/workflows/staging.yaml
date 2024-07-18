@@ -1,0 +1,31 @@
+name: deploy to test
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "20.x"
+      - name: Install dependencies and build
+        run: |
+          npm install
+          npm run build
+        env:
+          ASSET_PREFIX: "/prod/test0000"
+          NEXT_PUBLIC_BASE_URL: "https://alfred001.xsrv.jp/test-nextjs/prod/test-nextjs/"
+      - name: Generate SSH key
+        run: echo "$SSH_PRIVATE_KEY" > key && chmod 600 key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Deploy via rsync
+        run: |
+          ssh -i key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p 22 alfred001@sv8108.xserver.jp 'rm -rf /home/alfred001/alfred001.xsrv.jp/public_html/test-nextjs/prod/test-nextjs/*'
+          rsync -auzrv --delete --exclude .htaccess -e "ssh -i key -o
