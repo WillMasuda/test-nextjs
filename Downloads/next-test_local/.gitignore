@@ -36,6 +36,7 @@ yarn-error.log*
 next-env.d.ts
 
 # .gitignore ファイルの例
+# .gitignore ファイルの例
 Application Data/
 Cookies/
 Local Settings/
